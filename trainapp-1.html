@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>TrainApp — Arnaud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+  :root {
+    --bg: #080a12;
+    --bg2: #0d1020;
+    --card: #111420;
+    --card2: #161a28;
+    --border: #1e2235;
+    --border2: #252a40;
+    --primary: #4f9ef8;
+    --primary-dim: rgba(79,158,248,0.12);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.1);
+    --orange: #fb923c;
+    --orange-dim: rgba(251,146,60,0.1);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.1);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --yellow: #fbbf24;
+    --text: #e8eaf0;
+    --text2: #9ca3af;
+    --muted: #4b5563;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --nav-h: 64px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .screen {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: calc(var(--nav-h) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: rgba(8,10,18,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 4px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-family: var(--font-body);
+    position: relative;
+  }
+
+  .nav-btn.active { color: var(--primary); }
+
+  .nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+  .nav-btn .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
+
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 0 0 2px 2px;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .card-accent {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary { background: var(--primary); color: #000; }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-danger { background: var(--red-dim); border: 1px solid var(--red); color: var(--red); }
+  .btn:disabled { background: var(--card2); color: var(--muted); cursor: not-allowed; }
+  .btn:active:not(:disabled) { transform: scale(0.98); }
+
+  .btn-sm {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+
+  /* ─── PILLS ─── */
+  .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+  .pill {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .pill.active {
+    font-weight: 700;
+  }
+
+  /* ─── INPUTS ─── */
+  input[type="text"], input[type="number"], textarea {
+    background: var(--card2);
+    border: 1.5px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 10px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, textarea:focus { border-color: var(--primary); }
+  textarea { resize: vertical; min-height: 60px; }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary);
+    cursor: pointer;
+    height: 4px;
+  }
+
+  /* ─── TOGGLE ─── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 8px;
+  }
+
+  .toggle-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border2);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 12px;
+  }
+
+  /* ─── SCORE BUTTONS ─── */
+  .score-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .score-btn {
+    min-width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border2);
+    background: var(--card2);
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: all 0.12s;
+    padding: 0 8px;
+  }
+
+  .score-btn.active {
+    font-weight: 700;
+    color: #000;
+  }
+
+  /* ─── ALERT BANNER ─── */
+  .alert {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  /* ─── EXERCISE CARD ─── */
+  .ex-card {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+
+  .ex-card.done {
+    border-color: rgba(52,211,153,0.3);
+    background: rgba(52,211,153,0.05);
+  }
+
+  .ex-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .ex-charge { font-family: var(--font-mono); font-size: 13px; color: var(--primary); margin-top: 2px; }
+  .ex-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* ─── CUE BOX ─── */
+  .cue-box {
+    background: var(--bg2);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 10px;
+    margin: 10px 0;
+  }
+
+  .cue-label { font-size: 9px; color: var(--orange); font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
+  .cue-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── SET TRACKER ─── */
+  .set-tracker { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+
+  .set-dot {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border2);
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .set-dot.done {
+    background: var(--green-dim);
+    border-color: rgba(52,211,153,0.4);
+    color: var(--green);
+  }
+
+  /* ─── CHART WRAPPER ─── */
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .chart-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chart-val {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--primary);
+  }
+
+  /* ─── HISTORY ITEM ─── */
+  .hist-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .hist-item:active { border-color: var(--border2); }
+
+  .hist-emoji { font-size: 22px; flex-shrink: 0; }
+  .hist-title { font-weight: 600; font-size: 14px; color: var(--text); }
+  .hist-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .hist-arrow { color: var(--muted); font-size: 14px; flex-shrink: 0; margin-left: auto; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 16px calc(20px + var(--safe-bottom));
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  /* ─── TAGS ─── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── MISC ─── */
+  .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .value { font-family: var(--font-mono); font-size: 14px; font-weight: 500; }
+  .sep { height: 1px; background: var(--border); margin: 16px 0; }
+  .mono { font-family: var(--font-mono); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  /* ─── PROG SELECTOR ─── */
+  .seance-type-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.15s;
+    border-left-width: 4px;
+  }
+
+  .seance-type-card:active { transform: scale(0.99); }
+
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    transition: all 0.2s;
+  }
+
+  .step-dot.active { background: var(--primary); width: 20px; border-radius: 3px; }
+  .step-dot.done { background: var(--green); }
+
+  /* spinner */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* back button */
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    margin-bottom: 20px;
+    transition: all 0.15s;
+  }
+
+  .back-btn:active { background: var(--card); }
+
+  /* ─── COLOR HELPERS ─── */
+  .c-primary { color: var(--primary); }
+  .c-green { color: var(--green); }
+  .c-orange { color: var(--orange); }
+  .c-red { color: var(--red); }
+  .c-purple { color: var(--purple); }
+  .c-yellow { color: var(--yellow); }
+  .c-muted { color: var(--muted); }
+
+  .scrollable-x { overflow-x: auto; white-space: nowrap; }
+
+  /* input label */
+  .input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="screen" id="main-screen"></div>
+  <nav id="main-nav"></nav>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA MODEL
+// ══════════════════════════════════════════════════════
+
+const DB_KEY = 'trainapp_v1';
+
+function loadDB() {
+  try {
+    return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB();
+  } catch { return defaultDB(); }
+}
+
+function saveDB(db) {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+
+function defaultDB() {
+  return {
+    sessions: [],   // séances complètes
+    recups: [],     // logs réveil
+    runs: [],       // logs run
+    programme: defaultProgramme(),
+  };
+}
+
+function defaultProgramme() {
+  return {
+    BAS_A: {
+      label: "BAS A", emoji: "🏋️", color: "#fb923c", dureeMin: 60,
+      subtitle: "Hip Thrust · Squat · BSS",
+      exercices: [
+        { name: "Bird Dog", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "Colonne neutre, pas de rotation bassin", sideNote: "/côté" },
+        { name: "Hip Thrust barre", charge: "35.1 kg", sets: 4, reps: 12, rir: 1, cue: "Bascule pelvienne en haut, menton rentré" },
+        { name: "Goblet Squat", charge: "5 kg", sets: 3, reps: 15, rir: 2, cue: "Talons au sol, genoux dehors, dos neutre" },
+        { name: "Split Squat bulgare", charge: "Poids du corps", sets: 3, reps: 10, rir: 2, cue: "Pied sur canapé, genou dans axe orteil", sideNote: "/jambe" },
+        { name: "Dead Bug", charge: "Poids du corps", sets: 3, reps: 10, rir: 0, cue: "Lombaires plaqués, expiration forcée", sideNote: "/côté" },
+        { name: "Pallof Press", charge: "Élastique", sets: 3, reps: 10, rir: 0, cue: "Anti-rotation pure, hanches stables", sideNote: "/côté" },
+      ]
+    },
+    BAS_B: {
+      label: "BAS B", emoji: "🔥", color: "#f87171", dureeMin: 65,
+      subtitle: "RDL · Fentes · Run Tempo",
+      exercices: [
+        { name: "Bird Dog", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "Colonne neutre, tempo lent", sideNote: "/côté" },
+        { name: "RDL barre", charge: "35.1 kg", sets: 4, reps: 10, rir: 2, cue: "DOS NEUTRE ABSOLU — tempo 4-1-1 — stop si arrondi" },
+        { name: "Hip Thrust barre", charge: "35.1 kg", sets: 4, reps: 12, rir: 1, cue: "Pieds largeur épaules + légère rotation ext." },
+        { name: "Fentes avant", charge: "Poids du corps (cap 20kg)", sets: 3, reps: 10, rir: 2, cue: "Genou avant pas devant orteil, tronc vertical", sideNote: "/jambe" },
+        { name: "Mollets unilatéral", charge: "5 kg", sets: 3, reps: 10, rir: 1, cue: "Eccentric Heel Drop 4s descente — Achille G", sideNote: "/jambe" },
+        { name: "Planche frontale", charge: "Poids du corps", sets: 3, reps: null, rir: 0, cue: "Ligne talon-tête, gainage total", sideNote: "×30s" },
+      ]
+    },
+    HAUT: {
+      label: "HAUT", emoji: "💪", color: "#4f9ef8", dureeMin: 55,
+      subtitle: "Floor Press · Rowing · Militaire",
+      exercices: [
+        { name: "Dead Bug", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "Lombaires plaqués au sol, expiration forcée", sideNote: "/côté" },
+        { name: "Floor Press barre", charge: "35 kg", sets: 4, reps: 12, rir: 2, cue: "Sol = sécurité lombaire, gainage total" },
+        { name: "Rowing barre", charge: "25 kg", sets: 4, reps: 12, rir: 2, cue: "45° dos plat ABSOLU, coudes le long du corps ⚠ surveiller irradiation tibia" },
+        { name: "Militaire barre", charge: "15.1 kg", sets: 4, reps: 10, rir: 2, cue: "Debout gaîné, pas d'hyperextension lombaire" },
+        { name: "Curl haltères", charge: "5 kg/main", sets: 3, reps: 12, rir: 2, cue: "Assis, dos neutre, supination complète" },
+        { name: "Vacuum abdominal", charge: "Poids du corps", sets: 3, reps: null, rir: 0, cue: "Expiration totale puis respiration thoracique superficielle", sideNote: "×30s" },
+      ]
+    },
+    TAISO: {
+      label: "TAÏSO", emoji: "🧘", color: "#34d399", dureeMin: 35,
+      subtitle: "Mobilité · Posture · Gainage profond",
+      exercices: [
+        { name: "Chat-Vache lente", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "5s/phase, respiration nasale" },
+        { name: "Bird Dog", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "3s tenu en haut, pas de rotation bassin", sideNote: "/côté" },
+        { name: "McKenzie / Cobra", charge: "Poids du corps", sets: 3, reps: 8, rir: 0, cue: "Poussée progressive, hanches au sol" },
+        { name: "Dead Bug", charge: "Poids du corps", sets: 3, reps: 10, rir: 0, cue: "Lombaires plaqués, expiration forcée", sideNote: "/côté" },
+        { name: "Side-lying Hip Abduction", charge: "Poids du corps", sets: 3, reps: 15, rir: 0, cue: "Moyen fessier D prioritaire — brûlure = bon signe", sideNote: "/côté" },
+        { name: "Single Leg Stance", charge: "Poids du corps", sets: 3, reps: null, rir: 0, cue: "Short Foot actif — progression M0→M1", sideNote: "×20s/côté" },
+      ]
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+
+let db = loadDB();
+let currentTab = 'seance';
+let seanceState = null; // état de la séance en cours
+let modalEl = null;
+
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+
+const $ = (id) => document.getElementById(id);
+const today = () => {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+};
+const todayISO = () => new Date().toISOString().split('T')[0];
+const fmt = (v, unit='') => v != null ? `${v}${unit}` : '—';
+
+function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+function h(tag, attrs={}, ...children) {
+  const el = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v]) => {
+    if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else el.setAttribute(k, v);
+  });
+  children.flat().forEach(c => {
+    if (c == null || c === false) return;
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return el;
+}
+
+function showModal(content) {
+  closeModal();
+  const overlay = h('div', { class: 'modal-overlay', onClick: (e) => { if (e.target === overlay) closeModal(); } });
+  const modal = h('div', { class: 'modal' });
+  modal.appendChild(h('div', { class: 'modal-handle' }));
+  modal.appendChild(content);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  modalEl = overlay;
+}
+
+function closeModal() {
+  if (modalEl) { modalEl.remove(); modalEl = null; }
+}
+
+function toast(msg, color='var(--green)') {
+  const t = h('div', {
+    style: {
+      position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+      background: 'var(--card2)', border: `1px solid ${color}`,
+      color: color, borderRadius: '10px', padding: '10px 20px',
+      fontSize: '13px', fontWeight: '600', zIndex: '500',
+      whiteSpace: 'nowrap', fontFamily: 'var(--font-body)',
+      animation: 'fadeIn 0.2s ease',
+    }
+  }, msg);
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// ══════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════
+
+const TABS = [
+  { id: 'seance', icon: '🏋️', label: 'Séance' },
+  { id: 'progression', icon: '📈', label: 'Stats' },
+  { id: 'historique', icon: '📋', label: 'Historique' },
+  { id: 'programme', icon: '⚙️', label: 'Programme' },
+  { id: 'export', icon: '📤', label: 'Export' },
+];
+
+function renderNav() {
+  const nav = $('main-nav');
+  nav.innerHTML = '';
+  TABS.forEach(tab => {
+    const btn = h('button', {
+      class: `nav-btn${currentTab === tab.id ? ' active' : ''}`,
+      onClick: () => navigateTo(tab.id)
+    },
+      h('span', { class: 'nav-icon' }, tab.icon),
+      h('span', { class: 'nav-label' }, tab.label)
+    );
+    nav.appendChild(btn);
+  });
+}
+
+function navigateTo(tab) {
+  currentTab = tab;
+  if (tab !== 'seance') seanceState = null;
+  renderNav();
+  renderScreen();
+}
+
+// ══════════════════════════════════════════════════════
+// SCREEN ROUTER
+// ══════════════════════════════════════════════════════
+
+function renderScreen() {
+  const screen = $('main-screen');
+  screen.innerHTML = '';
+  screen.scrollTop = 0;
+
+  switch(currentTab) {
+    case 'seance':     renderSeance(screen); break;
+    case 'progression': renderProgression(screen); break;
+    case 'historique': renderHistorique(screen); break;
+    case 'programme':  renderProgramme(screen); break;
+    case 'export':     renderExport(screen); break;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// SÉANCE
+// ══════════════════════════════════════════════════════
+
+function renderSeance(screen) {
+  if (!seanceState) {
+    renderSeanceSelect(screen);
+  } else if (seanceState.step === 'protocole') {
+    renderSeanceProtocole(screen);
+  } else if (seanceState.step === 'workout') {
+    renderSeanceWorkout(screen);
+  } else if (seanceState.step === 'bilan') {
+    renderSeanceBilan(screen);
+  } else if (seanceState.step === 'resume') {
+    renderSeanceResume(screen);
+  }
+}
+
+function renderSeanceSelect(screen) {
+  screen.appendChild(h('div', { class: 'page-title' }, 'Séance du jour'));
+  screen.appendChild(h('div', { class: 'page-sub' }, today()));
+
+  // Alerte si séance récente
+  const lastSession = db.sessions[db.sessions.length - 1];
+  if (lastSession && lastSession.date === todayISO()) {
+    const al = h('div', { class: 'alert', style: { background: 'var(--orange-dim)', border: '1px solid rgba(251,146,60,0.3)', color: 'var(--orange)', marginBottom: '16px' } },
+      `⚡ Séance déjà enregistrée aujourd'hui : ${lastSession.type}`
+    );
+    screen.appendChild(al);
+  }
+
+  screen.appendChild(h('div', { class: 'section-title' }, 'Type de séance'));
+
+  Object.entries(db.programme).forEach(([key, s]) => {
+    const card = h('div', { class: 'seance-type-card', style: { borderLeftColor: s.color }, onClick: () => startSeance(key) });
+    card.appendChild(h('span', { style: { fontSize: '26px' } }, s.emoji));
+    const info = h('div', { style: { flex: '1' } });
+    info.appendChild(h('div', { style: { color: s.color, fontFamily: 'var(--font-display)', fontWeight: '700', fontSize: '16px' } }, s.label));
+    info.appendChild(h('div', { style: { color: 'var(--text2)', fontSize: '12px', marginTop: '2px' } }, s.subtitle));
+    card.appendChild(info);
+    card.appendChild(h('span', { style: { color: 'var(--muted)', fontSize: '12px' } }, `${s.dureeMin}min →`));
+    screen.appendChild(card);
+  });
+
+  // Bouton log réveil
+  screen.appendChild(h('div', { class: 'sep' }));
+  screen.appendChild(h('div', { class: 'section-title' }, 'Journée de récupération'));
+  const btnRecup = h('button', { class: 'btn btn-ghost', style: { marginBottom: '8px' }, onClick: () => openLogRecup() }, '🌅 Logger réveil / récup');
+  screen.appendChild(btnRecup);
+}
+
+function startSeance(typeKey) {
+  seanceState = {
+    step: 'protocole',
+    typeKey,
+    type: db.programme[typeKey],
+    startTime: Date.now(),
+    protocole: { mw: false, sf: false, tke: false },
+    exercices: db.programme[typeKey].exercices.map(ex => ({
+      ...ex,
+      chargeActuelle: ex.charge,
+      setsCompletés: 0,
+      rirRessenti: null,
+      done: false,
+    })),
+    bilan: { rpe: null, rir: null, dos: null, extra: null, notes: '' },
+  };
+  renderScreen();
+}
+
+function renderSeanceProtocole(screen) {
+  const { type, protocole } = seanceState;
+
+  const back = h('button', { class: 'back-btn', onClick: () => { seanceState = null; renderScreen(); } }, '← Retour');
+  screen.appendChild(back);
+
+  screen.appendChild(h('div', { class: 'page-title' }, `${type.emoji} ${type.label}`));
+  screen.appendChild(h('div', { class: 'page-sub' }, type.subtitle));
+
+  // Steps indicator
+  const steps = h('div', { class: 'step-indicator' });
+  ['active','','',''].forEach((s,i) => {
+    steps.appendChild(h('div', { class: `step-dot ${s}` }));
+  });
+  screen.appendChild(steps);
+
+  const banner = h('div', {
+    class: 'alert',
+    style: { background: 'var(--red-dim)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--red)', marginBottom: '16px' }
+  }, '🔴 Protocole pré-séance OBLIGATOIRE');
+  screen.appendChild(banner);
+
+  const items = [
+    { key: 'mw', emoji: '🦵', label: 'Monster Walk', detail: 'Élastique — 2×15' },
+    { key: 'sf', emoji: '🦶', label: 'Short Foot', detail: 'Chaque pied — 2×10' },
+    { key: 'tke', emoji: '🦵', label: 'TKE', detail: 'Élastique — 2×20' },
+  ];
+
+  items.forEach(item => {
+    const done = protocole[item.key];
+    const row = h('div', {
+      class: 'toggle-row',
+      style: {
+        background: done ? 'var(--green-dim)' : 'var(--card2)',
+        borderColor: done ? 'rgba(52,211,153,0.3)' : 'var(--border)',
+      },
+      onClick: () => {
+        seanceState.protocole[item.key] = !seanceState.protocole[item.key];
+        renderScreen();
+      }
+    });
+    const box = h('div', { class: 'toggle-box', style: { background: done ? 'var(--green)' : 'transparent', borderColor: done ? 'var(--green)' : 'var(--border2)' } });
+    if (done) box.textContent = '✓';
+    row.appendChild(box);
+    const txt = h('div');
+    txt.appendChild(h('div', { style: { color: done ? 'var(--green)' : 'var(--text)', fontWeight: '600', fontSize: '14px' } }, `${item.emoji} ${item.label}`));
+    txt.appendChild(h('div', { style: { color: 'var(--text2)', fontSize: '12px', marginTop: '2px' } }, item.detail));
+    row.appendChild(txt);
+    screen.appendChild(row);
+  });
+
+  const allDone = Object.values(protocole).every(Boolean);
+  const count = Object.values(protocole).filter(Boolean).length;
+
+  const btn = h('button', {
+    class: 'btn',
+    style: {
+      marginTop: '16px',
+      background: allDone ? 'var(--green)' : 'var(--card2)',
+      color: allDone ? '#000' : 'var(--muted)',
+      cursor: allDone ? 'pointer' : 'not-allowed',
+      pointerEvents: allDone ? 'auto' : 'none',
+    },
+    onClick: () => { if (allDone) { seanceState.step = 'workout'; renderScreen(); } }
+  }, allDone ? '✅ Démarrer la séance' : `${count}/3 validés`);
+  screen.appendChild(btn);
+}
+
+function renderSeanceWorkout(screen) {
+  const { type, exercices } = seanceState;
+  const [listView, setListView] = [false]; // toggle state via DOM
+
+  const back = h('button', { class: 'back-btn', onClick: () => { seanceState.step = 'protocole'; renderScreen(); } }, '← Protocole');
+  screen.appendChild(back);
+
+  const titleRow = h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' } });
+  titleRow.appendChild(h('div', { class: 'page-title', style: { fontSize: '20px' } }, `${type.emoji} ${type.label}`));
+
+  const viewToggle = h('button', {
+    class: 'btn-sm',
+    id: 'view-toggle',
+    style: { background: 'var(--card2)', border: '1px solid var(--border2)', color: 'var(--text2)' },
+    onClick: () => {
+      const isListNow = screen.getAttribute('data-view') === 'list';
+      screen.setAttribute('data-view', isListNow ? 'guided' : 'list');
+      viewToggle.textContent = isListNow ? '☰ Liste' : '▶ Guidé';
+      renderWorkoutContent(contentArea, isListNow ? 'guided' : 'list');
+    }
+  }, '☰ Liste');
+  titleRow.appendChild(viewToggle);
+  screen.appendChild(titleRow);
+
+  const done = exercices.filter(e => e.done).length;
+  screen.appendChild(h('div', { class: 'page-sub' }, `${done}/${exercices.length} exercices · ${type.dureeMin} min`));
+
+  // Progress bar
+  const progWrap = h('div', { style: { background: 'var(--border)', borderRadius: '4px', height: '4px', marginBottom: '20px', overflow: 'hidden' } });
+  progWrap.appendChild(h('div', { style: { background: type.color, height: '100%', width: `${(done/exercices.length)*100}%`, borderRadius: '4px', transition: 'width 0.3s' } }));
+  screen.appendChild(progWrap);
+
+  screen.setAttribute('data-view', 'guided');
+
+  const contentArea = h('div', { id: 'workout-content' });
+  screen.appendChild(contentArea);
+
+  renderWorkoutContent(contentArea, 'guided');
+
+  // Bouton bilan
+  const allDone = exercices.every(e => e.done);
+  const bilanBtn = h('button', {
+    class: 'btn',
+    style: { background: allDone ? type.color : 'var(--card2)', color: allDone ? '#000' : 'var(--muted)', marginTop: '16px' },
+    onClick: () => { seanceState.step = 'bilan'; renderScreen(); }
+  }, allDone ? '✅ Terminer & Bilan' : `Terminer (${done}/${exercices.length})`);
+  screen.appendChild(bilanBtn);
+}
+
+function renderWorkoutContent(container, view) {
+  container.innerHTML = '';
+  const { exercices, type } = seanceState;
+
+  if (view === 'list') {
+    // Vue liste compacte
+    exercices.forEach((ex, idx) => {
+      const card = buildExCard(ex, idx, type.color, true);
+      container.appendChild(card);
+    });
+  } else {
+    // Vue guidée : un exo à la fois (le premier non-done, ou tous si tous faits)
+    const currentIdx = exercices.findIndex(e => !e.done);
+    exercices.forEach((ex, idx) => {
+      const card = buildExCard(ex, idx, type.color, false, currentIdx === idx);
+      container.appendChild(card);
+    });
+  }
+}
+
+function buildExCard(ex, idx, accentColor, compact, isActive=false) {
+  const card = h('div', {
+    class: `ex-card${ex.done ? ' done' : ''}`,
+    style: {
+      borderColor: isActive ? accentColor + '60' : ex.done ? 'rgba(52,211,153,0.3)' : 'var(--border)',
+      opacity: (!isActive && !ex.done && !compact) ? '0.5' : '1',
+    }
+  });
+
+  const header = h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' } });
+  const left = h('div');
+  left.appendChild(h('div', { class: 'ex-name', style: { color: ex.done ? 'var(--green)' : 'var(--text)' } }, (ex.done ? '✓ ' : '') + ex.name));
+  left.appendChild(h('div', { class: 'ex-charge', style: { color: accentColor } }, ex.chargeActuelle));
+  header.appendChild(left);
+
+  const right = h('div', { style: { textAlign: 'right', flexShrink: '0', marginLeft: '8px' } });
+  const setsLabel = ex.reps ? `${ex.sets}×${ex.reps}${ex.sideNote || ''}` : `${ex.sets}${ex.sideNote || ''}`;
+  right.appendChild(h('div', { style: { fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: '600', color: 'var(--text)' } }, setsLabel));
+  header.appendChild(right);
+  card.appendChild(header);
+
+  if (!compact || isActive) {
+    // CUE
+    const cue = h('div', { class: 'cue-box' });
+    cue.appendChild(h('div', { class: 'cue-label' }, 'CUE'));
+    cue.appendChild(h('div', { class: 'cue-text' }, ex.cue));
+    card.appendChild(cue);
+
+    // Charge editable
+    const chargeWrap = h('div', { style: { marginBottom: '8px' } });
+    chargeWrap.appendChild(h('div', { class: 'input-label' }, 'Charge réelle'));
+    const chargeInput = h('input', {
+      type: 'text',
+      value: ex.chargeActuelle,
+      style: { fontFamily: 'var(--font-mono)' },
+      onChange: (e) => { seanceState.exercices[idx].chargeActuelle = e.target.value; },
+      onInput: (e) => { seanceState.exercices[idx].chargeActuelle = e.target.value; }
+    });
+    chargeWrap.appendChild(chargeInput);
+    card.appendChild(chargeWrap);
+
+    // Sets tracker
+    if (ex.sets > 0) {
+      const setWrap = h('div', { style: { marginBottom: '8px' } });
+      setWrap.appendChild(h('div', { class: 'input-label' }, `Sets complétés (${ex.setsCompletés}/${ex.sets})`));
+      const setRow = h('div', { class: 'set-tracker' });
+      for (let i = 0; i < ex.sets; i++) {
+        const dot = h('div', {
+          class: `set-dot${i < ex.setsCompletés ? ' done' : ''}`,
+          onClick: () => {
+            seanceState.exercices[idx].setsCompletés = i < ex.setsCompletés ? i : i + 1;
+            renderScreen();
+          }
+        }, String(i + 1));
+        setRow.appendChild(dot);
+      }
+      setWrap.appendChild(setRow);
+      card.appendChild(setWrap);
+    }
+
+    // RIR
+    if (ex.rir !== undefined && ex.rir !== null && ex.rir > 0) {
+      const rirWrap = h('div', { style: { marginBottom: '10px' } });
+      rirWrap.appendChild(h('div', { class: 'input-label' }, 'RIR ressenti'));
+      const rirRow = h('div', { class: 'score-row' });
+      [0,1,2,3,4].forEach(v => {
+        const btn = h('button', {
+          class: `score-btn${ex.rirRessenti === v ? ' active' : ''}`,
+          style: { background: ex.rirRessenti === v ? 'var(--purple)' : 'var(--card2)', borderColor: ex.rirRessenti === v ? 'var(--purple)' : 'var(--border2)' },
+          onClick: () => { seanceState.exercices[idx].rirRessenti = v; renderScreen(); }
+        }, String(v));
+        rirRow.appendChild(btn);
+      });
+      rirWrap.appendChild(rirRow);
+      card.appendChild(rirWrap);
+    }
+  }
+
+  // Bouton marquer fait
+  const doneBtn = h('button', {
+    class: 'btn-sm',
+    style: {
+      background: ex.done ? 'var(--green-dim)' : 'var(--primary-dim)',
+      color: ex.done ? 'var(--green)' : 'var(--primary)',
+      border: `1px solid ${ex.done ? 'rgba(52,211,153,0.3)' : 'rgba(79,158,248,0.3)'}`,
+      width: '100%', marginTop: '8px',
+    },
+    onClick: () => {
+      seanceState.exercices[idx].done = !seanceState.exercices[idx].done;
+      if (seanceState.exercices[idx].done && seanceState.exercices[idx].setsCompletés < ex.sets) {
+        seanceState.exercices[idx].setsCompletés = ex.sets;
+      }
+      renderScreen();
+    }
+  }, ex.done ? '✓ Fait' : 'Marquer fait');
+  card.appendChild(doneBtn);
+
+  return card;
+}
+
+function renderSeanceBilan(screen) {
+  const { type, bilan } = seanceState;
+
+  const back = h('button', { class: 'back-btn', onClick: () => { seanceState.step = 'workout'; renderScreen(); } }, '← Séance');
+  screen.appendChild(back);
+
+  screen.appendChild(h('div', { class: 'page-title' }, 'Bilan de séance'));
+  screen.appendChild(h('div', { class: 'page-sub' }, `${type.emoji} ${type.label} · ${today()}`));
+
+  // RPE
+  buildScoreSection(screen, 'RPE — Effort perçu', '1 = très facile · 10 = max · Cap ≤7', bilan.rpe,
+    Array.from({length:10},(_,i)=>i+1), (v) => { seanceState.bilan.rpe = v; renderScreen(); },
+    v => v > 7 ? 'var(--red)' : v > 5 ? 'var(--orange)' : 'var(--green)'
+  );
+
+  if (bilan.rpe > 7) {
+    screen.appendChild(h('div', { class: 'alert', style: { background: 'var(--red-dim)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--red)', marginBottom: '12px' } },
+      `⚠ RPE ${bilan.rpe}/10 dépasse le cap cardiaque actuel (≤7)`
+    ));
+  }
+
+  // RIR
+  buildScoreSection(screen, 'RIR — Reps en réserve', '0 = échec · 2 = cap minimum', bilan.rir,
+    [0,1,2,3,4,5], (v) => { seanceState.bilan.rir = v; renderScreen(); },
+    () => 'var(--primary)'
+  );
+
+  // Dos
+  buildScoreSection(screen, 'État lombaire fin de séance', '0 = aucune gêne · 10 = douleur', bilan.dos,
+    Array.from({length:11},(_,i)=>i), (v) => { seanceState.bilan.dos = v; renderScreen(); },
+    v => v > 3 ? 'var(--red)' : 'var(--green)'
+  );
+
+  // Extrasystoles
+  screen.appendChild(h('div', { class: 'section-title' }, 'Extrasystoles'));
+  const extraRow = h('div', { style: { display: 'flex', gap: '8px', marginBottom: '16px' } });
+  [{ v: 0, label: '✅ Aucune', color: 'var(--green)' }, { v: 1, label: '🟠 À l\'effort', color: 'var(--orange)' }, { v: 2, label: '🔴 Au repos', color: 'var(--red)' }]
+    .forEach(opt => {
+      const btn = h('button', {
+        class: 'btn-sm',
+        style: {
+          flex: '1', padding: '10px 4px', borderRadius: '10px',
+          background: bilan.extra === opt.v ? opt.color + '20' : 'var(--card2)',
+          border: `1.5px solid ${bilan.extra === opt.v ? opt.color : 'var(--border2)'}`,
+          color: bilan.extra === opt.v ? opt.color : 'var(--text2)',
+        },
+        onClick: () => { seanceState.bilan.extra = bilan.extra === opt.v ? null : opt.v; renderScreen(); }
+      }, opt.label);
+      extraRow.appendChild(btn);
+    });
+  screen.appendChild(extraRow);
+
+  // Notes
+  screen.appendChild(h('div', { class: 'section-title' }, 'Note libre'));
+  const ta = h('textarea', {
+    placeholder: 'Ex: irradiation tibia Rowing, genou D sur fentes, fatigue SNC...',
+    style: { marginBottom: '16px' },
+    onInput: (e) => { seanceState.bilan.notes = e.target.value; }
+  });
+  ta.value = bilan.notes;
+  screen.appendChild(ta);
+
+  const canSubmit = bilan.rpe !== null;
+  const btn = h('button', {
+    class: 'btn',
+    style: { background: canSubmit ? type.color : 'var(--card2)', color: canSubmit ? '#000' : 'var(--muted)' },
+    disabled: !canSubmit,
+    onClick: () => { saveSeance(); }
+  }, canSubmit ? '💾 Enregistrer la séance' : 'RPE obligatoire');
+  screen.appendChild(btn);
+}
+
+function buildScoreSection(screen, label, sub, current, values, onChange, colorFn) {
+  screen.appendChild(h('div', { class: 'section-title' }, label));
+  if (sub) screen.appendChild(h('div', { style: { fontSize: '10px', color: 'var(--text2)', marginBottom: '8px', marginTop: '-6px' } }, sub));
+  const row = h('div', { class: 'score-row', style: { marginBottom: '16px' } });
+  values.forEach(v => {
+    const color = colorFn(v);
+    const active = current === v;
+    const btn = h('button', {
+      class: `score-btn${active ? ' active' : ''}`,
+      style: {
+        background: active ? color : 'var(--card2)',
+        borderColor: active ? color : 'var(--border2)',
+        color: active ? '#000' : 'var(--text2)',
+      },
+      onClick: () => onChange(current === v ? null : v)
+    }, String(v));
+    row.appendChild(btn);
+  });
+  screen.appendChild(row);
+}
+
+function saveSeance() {
+  const { typeKey, type, exercices, bilan, startTime, protocole } = seanceState;
+  const dureeMin = Math.round((Date.now() - startTime) / 60000);
+
+  const session = {
+    id: Date.now(),
+    date: todayISO(),
+    displayDate: today(),
+    typeKey,
+    type: type.label,
+    emoji: type.emoji,
+    dureeMin: dureeMin || type.dureeMin,
+    protocole: Object.values(protocole).every(Boolean),
+    exercices: exercices.map(ex => ({
+      name: ex.name,
+      charge: ex.chargeActuelle,
+      sets: ex.sets,
+      reps: ex.reps,
+      setsCompletés: ex.setsCompletés,
+      rirRessenti: ex.rirRessenti,
+      done: ex.done,
+    })),
+    bilan: { ...bilan },
+    sRPE: bilan.rpe && dureeMin ? bilan.rpe * dureeMin : null,
+  };
+
+  db.sessions.push(session);
+  saveDB(db);
+
+  seanceState.step = 'resume';
+  seanceState.savedSession = session;
+  renderScreen();
+}
+
+function renderSeanceResume(screen) {
+  const session = seanceState.savedSession;
+  const { type } = seanceState;
+
+  screen.appendChild(h('div', { class: 'page-title', style: { color: 'var(--green)' } }, '✅ Séance enregistrée'));
+  screen.appendChild(h('div', { class: 'page-sub' }, today()));
+
+  // Stats rapides
+  const statsCard = h('div', { class: 'card', style: { marginBottom: '16px' } });
+  const statsGrid = h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', textAlign: 'center' } });
+  [
+    { label: 'Durée', val: `${session.dureeMin}min` },
+    { label: 'RPE', val: `${session.bilan.rpe}/10` },
+    { label: 'sRPE', val: session.sRPE || '—' },
+  ].forEach(s => {
+    const cell = h('div');
+    cell.appendChild(h('div', { style: { fontFamily: 'var(--font-mono)', fontSize: '18px', fontWeight: '600', color: 'var(--primary)' } }, s.val));
+    cell.appendChild(h('div', { style: { fontSize: '10px', color: 'var(--text2)', marginTop: '2px', letterSpacing: '0.5px' } }, s.label));
+    statsGrid.appendChild(cell);
+  });
+  statsCard.appendChild(statsGrid);
+  screen.appendChild(statsCard);
+
+  // Résumé Claude
+  const resumeText = generateClaudeResume(session);
+  screen.appendChild(h('div', { class: 'section-title' }, '📋 Résumé pour Claude'));
+
+  const pre = h('div', {
+    style: {
+      background: 'var(--card)', border: '1px solid var(--border)',
+      borderRadius: '12px', padding: '14px', marginBottom: '12px',
+      fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text)',
+      lineHeight: '1.7', whiteSpace: 'pre-wrap', overflowX: 'auto',
+      maxHeight: '200px', overflowY: 'auto',
+    }
+  }, resumeText);
+  screen.appendChild(pre);
+
+  const copyBtn = h('button', { class: 'btn btn-primary', style: { marginBottom: '10px' },
+    onClick: () => {
+      navigator.clipboard?.writeText(resumeText).then(() => toast('✅ Copié dans le presse-papier'));
+    }
+  }, '📋 Copier pour Claude');
+  screen.appendChild(copyBtn);
+
+  const newBtn = h('button', { class: 'btn btn-ghost',
+    onClick: () => { seanceState = null; renderScreen(); }
+  }, '← Nouvelle séance');
+  screen.appendChild(newBtn);
+}
+
+function generateClaudeResume(session) {
+  const exLines = session.exercices
+    .filter(e => e.done)
+    .map(e => `  • ${e.name}: ${e.charge} — ${e.setsCompletés}×${e.reps || '?'} reps${e.rirRessenti !== null ? ` (RIR ressenti: ${e.rirRessenti})` : ''}`)
+    .join('\n');
+
+  const extraLabels = ['—', 'À l\'effort', 'Au repos ⚠'];
+  return `📋 SÉANCE ${session.displayDate} — ${session.type}
+Durée: ${session.dureeMin} min | RPE: ${session.bilan.rpe}/10 | RIR: ${fmt(session.bilan.rir)} | sRPE: ${fmt(session.sRPE)}
+Dos: ${fmt(session.bilan.dos, '/10')} | Extrasystoles: ${session.bilan.extra !== null ? extraLabels[session.bilan.extra] : '—'}
+Protocole pré-séance: ${session.protocole ? '✅' : '❌'}
+
+EXERCICES:
+${exLines || '  (aucun exercice validé)'}
+
+Notes: ${session.bilan.notes || '—'}
+
+---
+Format journal (copier dans Sheets):
+Date | Type | Durée | RPE | RIR | sRPE | Dos | Extrasystoles | Notes
+${session.date} | ${session.type} | ${session.dureeMin} | ${session.bilan.rpe} | ${fmt(session.bilan.rir)} | ${fmt(session.sRPE)} | ${fmt(session.bilan.dos)} | ${session.bilan.extra !== null ? extraLabels[session.bilan.extra] : ''} | ${session.bilan.notes}`;
+}
+
+// Log réveil
+function openLogRecup() {
+  const state = { bb: null, rhr: null, fatigue: null, dos: null, extra: null, alcool: false, stress: false, infect: false, notes: '' };
+
+  const content = h('div');
+  content.appendChild(h('div', { style: { fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: '700', marginBottom: '16px' } }, '🌅 Log réveil'));
+
+  // BB slider
+  const bbWrap = h('div', { style: { marginBottom: '16px' } });
+  const bbRow = h('div', { class: 'row' });
+  bbRow.appendChild(h('span', { class: 'label' }, 'Body Battery'));
+  const bbVal = h('span', { class: 'value', style: { color: 'var(--purple)' } }, '—');
+  bbRow.appendChild(bbVal);
+  bbWrap.appendChild(bbRow);
+  const bbSlider = h('input', { type: 'range', min: '0', max: '100', step: '5', value: '50',
+    onInput: (e) => { state.bb = Number(e.target.value); bbVal.textContent = state.bb; }
+  });
+  bbWrap.appendChild(bbSlider);
+  content.appendChild(bbWrap);
+
+  // RHR
+  const rhrWrap = h('div', { style: { marginBottom: '16px' } });
+  rhrWrap.appendChild(h('div', { class: 'label', style: { marginBottom: '8px' } }, 'FC repos (bpm)'));
+  const rhrInput = h('input', { type: 'number', placeholder: '49', style: { width: '100%' },
+    onInput: (e) => { state.rhr = Number(e.target.value); }
+  });
+  rhrWrap.appendChild(rhrInput);
+  content.appendChild(rhrWrap);
+
+  // Fatigue
+  const fatWrap = h('div', { style: { marginBottom: '16px' } });
+  fatWrap.appendChild(h('div', { class: 'label', style: { marginBottom: '6px' } }, 'Fatigue (0–10)'));
+  const fatRow = h('div', { class: 'score-row' });
+  let fatBtns = [];
+  Array.from({length:11},(_,i)=>i).forEach(v => {
+    const btn = h('button', { class: 'score-btn', onClick: () => {
+      state.fatigue = v;
+      fatBtns.forEach((b,i) => {
+        const active = i === v;
+        b.style.background = active ? 'var(--orange)' : 'var(--card2)';
+        b.style.color = active ? '#000' : 'var(--text2)';
+        b.style.borderColor = active ? 'var(--orange)' : 'var(--border2)';
+      });
+    }}, String(v));
+    fatBtns.push(btn);
+    fatRow.appendChild(btn);
+  });
+  fatWrap.appendChild(fatRow);
+  content.appendChild(fatWrap);
+
+  // Notes
+  content.appendChild(h('div', { class: 'label', style: { marginBottom: '6px' } }, 'Note libre'));
+  const ta = h('textarea', { placeholder: 'Extrasystoles, douleurs...', onInput: e => { state.notes = e.target.value; } });
+  content.appendChild(ta);
+
+  content.appendChild(h('div', { style: { height: '12px' } }));
+
+  const btn = h('button', { class: 'btn btn-primary', style: { marginTop: '16px' },
+    onClick: () => {
+      const recup = {
+        id: Date.now(), date: todayISO(), displayDate: today(),
+        bb: state.bb, rhr: state.rhr, fatigue: state.fatigue,
+        dos: state.dos, notes: state.notes,
+      };
+      db.recups.push(recup);
+      saveDB(db);
+      closeModal();
+      toast('✅ Réveil enregistré');
+    }
+  }, '💾 Enregistrer');
+  content.appendChild(btn);
+
+  showModal(content);
+}
+
+// ══════════════════════════════════════════════════════
+// PROGRESSION
+// ══════════════════════════════════════════════════════
+
+function renderProgression(screen) {
+  screen.appendChild(h('div', { class: 'page-title' }, 'Progression'));
+  screen.appendChild(h('div', { class: 'page-sub' }, '4 dernières semaines'));
+
+  const sessions = db.sessions;
+  const recups = db.recups;
+
+  if (sessions.length === 0 && recups.length === 0) {
+    screen.appendChild(h('div', { class: 'empty-state' },
+      h('div', { class: 'empty-icon' }, '📈'),
+      h('p', {}, 'Les graphiques apparaîtront après\ntes premières séances enregistrées.')
+    ));
+    return;
+  }
+
+  // Chart Hip Thrust
+  const hipData = getExerciseData(sessions, 'Hip Thrust barre');
+  if (hipData.labels.length > 0) {
+    renderLineChart(screen, 'Hip Thrust', hipData, 'var(--orange)', 'kg');
+  }
+
+  // Chart RDL
+  const rdlData = getExerciseData(sessions, 'RDL barre');
+  if (rdlData.labels.length > 0) {
+    renderLineChart(screen, 'RDL barre', rdlData, 'var(--red)', 'kg');
+  }
+
+  // Chart BB
+  const bbData = getBBData(recups);
+  if (bbData.labels.length > 0) {
+    renderLineChart(screen, 'Body Battery', bbData, 'var(--purple)', '');
+  }
+
+  // Chart RHR
+  const rhrData = getRHRData(recups);
+  if (rhrData.labels.length > 0) {
+    renderLineChart(screen, 'FC repos (RHR)', rhrData, 'var(--primary)', 'bpm');
+  }
+
+  // Chart sRPE charge
+  const loadData = getsRPEData(sessions);
+  if (loadData.labels.length > 0) {
+    renderBarChart(screen, 'Charge d\'entraînement (sRPE)', loadData);
+  }
+
+  if ([hipData, rdlData, bbData, rhrData].every(d => d.labels.length === 0)) {
+    screen.appendChild(h('div', { class: 'empty-state' },
+      h('div', { class: 'empty-icon' }, '📊'),
+      h('p', {}, 'Données insuffisantes pour\nafficher les graphiques.')
+    ));
+  }
+}
+
+function getExerciseData(sessions, exName) {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 28);
+  const points = sessions
+    .filter(s => new Date(s.date) >= cutoff)
+    .flatMap(s => (s.exercices || [])
+      .filter(e => e.name === exName && e.charge)
+      .map(e => ({ date: s.date, charge: parseFloat(e.charge) || 0 }))
+    )
+    .filter(p => p.charge > 0);
+
+  return {
+    labels: points.map(p => p.date.slice(5)),
+    data: points.map(p => p.charge),
+  };
+}
+
+function getBBData(recups) {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 28);
+  const pts = recups.filter(r => new Date(r.date) >= cutoff && r.bb != null);
+  return { labels: pts.map(r => r.date.slice(5)), data: pts.map(r => r.bb) };
+}
+
+function getRHRData(recups) {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 28);
+  const pts = recups.filter(r => new Date(r.date) >= cutoff && r.rhr != null);
+  return { labels: pts.map(r => r.date.slice(5)), data: pts.map(r => r.rhr) };
+}
+
+function getsRPEData(sessions) {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 28);
+  const pts = sessions.filter(s => new Date(s.date) >= cutoff && s.sRPE != null);
+  return { labels: pts.map(s => s.date.slice(5)), data: pts.map(s => s.sRPE) };
+}
+
+let chartInstances = {};
+
+function renderLineChart(screen, title, chartData, color, unit) {
+  const wrap = h('div', { class: 'chart-wrap' });
+  const titleEl = h('div', { class: 'chart-title' });
+  titleEl.appendChild(h('span', {}, title));
+  if (chartData.data.length > 0) {
+    const last = chartData.data[chartData.data.length - 1];
+    titleEl.appendChild(h('span', { class: 'chart-val', style: { color } }, `${last}${unit}`));
+  }
+  wrap.appendChild(titleEl);
+
+  const canvasId = 'chart_' + title.replace(/\s/g,'_');
+  const canvas = h('canvas', { id: canvasId, style: { maxHeight: '160px' } });
+  wrap.appendChild(canvas);
+  screen.appendChild(wrap);
+
+  // Render after DOM insert
+  requestAnimationFrame(() => {
+    if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); }
+    const ctx = canvas.getContext('2d');
+    chartInstances[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          data: chartData.data,
+          borderColor: color,
+          backgroundColor: color.replace('var(','').replace(')','') + '20',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: color,
+          tension: 0.3,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: '#1e2235' } },
+          y: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: '#1e2235' } }
+        }
+      }
+    });
+  });
+}
+
+function renderBarChart(screen, title, chartData) {
+  const wrap = h('div', { class: 'chart-wrap' });
+  wrap.appendChild(h('div', { class: 'chart-title' }, title));
+  const canvasId = 'chart_' + title.replace(/\s/g,'_');
+  const canvas = h('canvas', { id: canvasId, style: { maxHeight: '140px' } });
+  wrap.appendChild(canvas);
+  screen.appendChild(wrap);
+
+  requestAnimationFrame(() => {
+    if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); }
+    const ctx = canvas.getContext('2d');
+    chartInstances[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          data: chartData.data,
+          backgroundColor: 'rgba(79,158,248,0.3)',
+          borderColor: 'var(--primary)',
+          borderWidth: 1,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: '#1e2235' } }
+        }
+      }
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// HISTORIQUE
+// ══════════════════════════════════════════════════════
+
+function renderHistorique(screen) {
+  screen.appendChild(h('div', { class: 'page-title' }, 'Historique'));
+  screen.appendChild(h('div', { class: 'page-sub' }, `${db.sessions.length} séances enregistrées`));
+
+  const allEntries = [
+    ...db.sessions.map(s => ({ ...s, _type: 'session' })),
+    ...db.recups.map(r => ({ ...r, _type: 'recup' })),
+    ...db.runs.map(r => ({ ...r, _type: 'run' })),
+  ].sort((a,b) => b.date.localeCompare(a.date));
+
+  if (allEntries.length === 0) {
+    screen.appendChild(h('div', { class: 'empty-state' },
+      h('div', { class: 'empty-icon' }, '📋'),
+      h('p', {}, 'Aucune entrée pour l\'instant.\nLes séances enregistrées\napparaîtront ici.')
+    ));
+    return;
+  }
+
+  allEntries.forEach(entry => {
+    const item = h('div', { class: 'hist-item', onClick: () => showEntryDetail(entry) });
+    item.appendChild(h('span', { class: 'hist-emoji' }, entry.emoji || (entry._type === 'recup' ? '🌅' : '🏃')));
+    const info = h('div', { style: { flex: '1' } });
+
+    if (entry._type === 'session') {
+      info.appendChild(h('div', { class: 'hist-title' }, entry.type));
+      const meta = [];
+      if (entry.dureeMin) meta.push(`${entry.dureeMin} min`);
+      if (entry.bilan?.rpe) meta.push(`RPE ${entry.bilan.rpe}`);
+      if (entry.bilan?.dos != null) meta.push(`Dos ${entry.bilan.dos}/10`);
+      info.appendChild(h('div', { class: 'hist-meta' }, `${entry.displayDate} · ${meta.join(' · ')}`));
+    } else if (entry._type === 'recup') {
+      info.appendChild(h('div', { class: 'hist-title' }, 'Réveil / Récup'));
+      const meta = [];
+      if (entry.bb != null) meta.push(`BB ${entry.bb}`);
+      if (entry.rhr) meta.push(`RHR ${entry.rhr} bpm`);
+      info.appendChild(h('div', { class: 'hist-meta' }, `${entry.displayDate} · ${meta.join(' · ')}`));
+    }
+
+    item.appendChild(info);
+    item.appendChild(h('span', { class: 'hist-arrow' }, '›'));
+    screen.appendChild(item);
+  });
+}
+
+function showEntryDetail(entry) {
+  const content = h('div');
+
+  if (entry._type === 'session') {
+    content.appendChild(h('div', { style: { fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: '700', marginBottom: '4px' } }, `${entry.emoji} ${entry.type}`));
+    content.appendChild(h('div', { style: { color: 'var(--text2)', fontSize: '12px', marginBottom: '20px' } }, entry.displayDate));
+
+    const stats = h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' } });
+    [
+      { l: 'Durée', v: `${entry.dureeMin} min` },
+      { l: 'RPE', v: `${entry.bilan?.rpe}/10` },
+      { l: 'RIR', v: fmt(entry.bilan?.rir) },
+      { l: 'sRPE', v: fmt(entry.sRPE) },
+      { l: 'Dos', v: fmt(entry.bilan?.dos, '/10') },
+    ].forEach(({ l, v }) => {
+      const cell = h('div', { class: 'card', style: { textAlign: 'center', margin: '0' } });
+      cell.appendChild(h('div', { style: { fontFamily: 'var(--font-mono)', fontSize: '16px', color: 'var(--primary)' } }, v));
+      cell.appendChild(h('div', { style: { fontSize: '10px', color: 'var(--text2)', marginTop: '2px' } }, l));
+      stats.appendChild(cell);
+    });
+    content.appendChild(stats);
+
+    if (entry.exercices?.length) {
+      content.appendChild(h('div', { style: { fontSize: '11px', fontWeight: '700', color: 'var(--text2)', letterSpacing: '1px', marginBottom: '8px' } }, 'EXERCICES'));
+      entry.exercices.forEach(ex => {
+        const row = h('div', { style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '13px' } });
+        row.appendChild(h('span', { style: { color: ex.done ? 'var(--text)' : 'var(--muted)' } }, (ex.done ? '✓ ' : '○ ') + ex.name));
+        row.appendChild(h('span', { style: { fontFamily: 'var(--font-mono)', color: 'var(--primary)', fontSize: '12px' } }, ex.charge));
+        content.appendChild(row);
+      });
+    }
+
+    if (entry.bilan?.notes) {
+      content.appendChild(h('div', { style: { marginTop: '12px', background: 'var(--card2)', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: 'var(--text2)', lineHeight: '1.5' } }, entry.bilan.notes));
+    }
+
+    content.appendChild(h('div', { style: { height: '12px' } }));
+
+    const copyBtn = h('button', { class: 'btn btn-primary', style: { marginTop: '12px' },
+      onClick: () => {
+        const txt = generateClaudeResume(entry);
+        navigator.clipboard?.writeText(txt).then(() => toast('✅ Copié'));
+      }
+    }, '📋 Copier résumé Claude');
+    content.appendChild(copyBtn);
+
+  } else if (entry._type === 'recup') {
+    content.appendChild(h('div', { style: { fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: '700', marginBottom: '4px' } }, '🌅 Réveil'));
+    content.appendChild(h('div', { style: { color: 'var(--text2)', fontSize: '12px', marginBottom: '20px' } }, entry.displayDate));
+    const rows = [
+      { l: 'Body Battery', v: fmt(entry.bb), c: 'var(--purple)' },
+      { l: 'FC repos', v: entry.rhr ? `${entry.rhr} bpm` : '—', c: 'var(--primary)' },
+      { l: 'Fatigue', v: fmt(entry.fatigue, '/10'), c: 'var(--orange)' },
+    ];
+    rows.forEach(({ l, v, c }) => {
+      const row = h('div', { class: 'row', style: { marginBottom: '10px' } });
+      row.appendChild(h('span', { class: 'label' }, l));
+      row.appendChild(h('span', { style: { fontFamily: 'var(--font-mono)', color: c, fontSize: '16px' } }, v));
+      content.appendChild(row);
+    });
+    if (entry.notes) content.appendChild(h('div', { style: { background: 'var(--card2)', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: 'var(--text2)' } }, entry.notes));
+  }
+
+  showModal(content);
+}
+
+// ══════════════════════════════════════════════════════
+// PROGRAMME (édition)
+// ══════════════════════════════════════════════════════
+
+function renderProgramme(screen) {
+  screen.appendChild(h('div', { class: 'page-title' }, 'Programme'));
+  screen.appendChild(h('div', { class: 'page-sub' }, 'Éditer exercices et charges de référence'));
+
+  Object.entries(db.programme).forEach(([key, seance]) => {
+    const wrap = h('div', { class: 'card', style: { marginBottom: '12px' } });
+
+    const header = h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', cursor: 'pointer' } });
+    header.appendChild(h('span', { style: { fontSize: '20px' } }, seance.emoji));
+    header.appendChild(h('div', {
+      style: { fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: '700', color: seance.color }
+    }, seance.label));
+
+    const editBtn = h('button', { class: 'btn-sm',
+      style: { background: 'var(--card2)', border: '1px solid var(--border2)', color: 'var(--text2)', marginLeft: 'auto' },
+      onClick: () => editSeance(key)
+    }, '✏️ Modifier');
+    header.appendChild(editBtn);
+    wrap.appendChild(header);
+
+    seance.exercices.forEach(ex => {
+      const row = h('div', { style: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '13px', alignItems: 'center' } });
+      row.appendChild(h('span', { style: { color: 'var(--text)', flex: '1' } }, ex.name));
+      row.appendChild(h('span', { style: { fontFamily: 'var(--font-mono)', color: seance.color, fontSize: '12px', marginLeft: '8px' } }, ex.charge));
+      wrap.appendChild(row);
+    });
+
+    screen.appendChild(wrap);
+  });
+}
+
+function editSeance(key) {
+  const seance = db.programme[key];
+  const content = h('div');
+  content.appendChild(h('div', { style: { fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: seance.color } }, `${seance.emoji} ${seance.label}`));
+
+  // Durée
+  content.appendChild(h('div', { class: 'input-label', style: { marginTop: '0' } }, 'Durée estimée (min)'));
+  const dureeInput = h('input', { type: 'number', value: seance.dureeMin, style: { marginBottom: '16px' },
+    onInput: e => { db.programme[key].dureeMin = parseInt(e.target.value) || seance.dureeMin; }
+  });
+  content.appendChild(dureeInput);
+
+  const total = seance.exercices.length;
+  seance.exercices.forEach((ex, idx) => {
+    const exWrap = h('div', { style: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px', marginBottom: '10px' } });
+
+    // Ligne 1 : ordre + nom + supprimer
+    const nameRow = h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' } });
+
+    // Boutons haut / bas
+    const orderCol = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px', flexShrink: '0' } });
+    const upBtn = h('button', { class: 'btn-sm',
+      style: { padding: '2px 7px', fontSize: '11px', background: idx === 0 ? 'transparent' : 'var(--card2)', border: '1px solid var(--border2)', color: idx === 0 ? 'var(--muted)' : 'var(--text2)', cursor: idx === 0 ? 'default' : 'pointer', borderRadius: '5px' },
+      onClick: () => {
+        if (idx === 0) return;
+        const arr = db.programme[key].exercices;
+        [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+        saveDB(db); closeModal(); editSeance(key);
+      }
+    }, '▲');
+    const downBtn = h('button', { class: 'btn-sm',
+      style: { padding: '2px 7px', fontSize: '11px', background: idx === total-1 ? 'transparent' : 'var(--card2)', border: '1px solid var(--border2)', color: idx === total-1 ? 'var(--muted)' : 'var(--text2)', cursor: idx === total-1 ? 'default' : 'pointer', borderRadius: '5px' },
+      onClick: () => {
+        if (idx === total-1) return;
+        const arr = db.programme[key].exercices;
+        [arr[idx], arr[idx+1]] = [arr[idx+1], arr[idx]];
+        saveDB(db); closeModal(); editSeance(key);
+      }
+    }, '▼');
+    orderCol.appendChild(upBtn);
+    orderCol.appendChild(downBtn);
+    nameRow.appendChild(orderCol);
+
+    // Input nom éditable
+    const nameInput = h('input', { type: 'text', value: ex.name,
+      style: { flex: '1', fontWeight: '600', fontSize: '13px', background: 'var(--card2)', border: '1px solid var(--border2)', borderRadius: '7px', color: 'var(--text)', padding: '6px 10px' },
+      onInput: e => { db.programme[key].exercices[idx].name = e.target.value; }
+    });
+    nameRow.appendChild(nameInput);
+
+    const delBtn = h('button', { class: 'btn-sm',
+      style: { background: 'var(--red-dim)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--red)', padding: '4px 8px', flexShrink: '0' },
+      onClick: () => {
+        if (!confirm(`Supprimer "${ex.name}" ?`)) return;
+        db.programme[key].exercices.splice(idx, 1);
+        saveDB(db); closeModal(); editSeance(key);
+      }
+    }, '✕');
+    nameRow.appendChild(delBtn);
+    exWrap.appendChild(nameRow);
+
+    // Charge
+    exWrap.appendChild(h('div', { class: 'input-label', style: { marginTop: '0' } }, 'Charge'));
+    const chargeIn = h('input', { type: 'text', value: ex.charge, style: { marginBottom: '8px' },
+      onInput: e => { db.programme[key].exercices[idx].charge = e.target.value; }
+    });
+    exWrap.appendChild(chargeIn);
+
+    // Cue
+    exWrap.appendChild(h('div', { class: 'input-label', style: { marginTop: '0' } }, 'Cue technique'));
+    const cueIn = h('input', { type: 'text', value: ex.cue || '', style: { marginBottom: '8px' },
+      placeholder: 'Consigne technique...',
+      onInput: e => { db.programme[key].exercices[idx].cue = e.target.value; }
+    });
+    exWrap.appendChild(cueIn);
+
+    // Sets & Reps
+    const srRow = h('div', { style: { display: 'flex', gap: '8px' } });
+    const setsWrap = h('div', { style: { flex: '1' } });
+    setsWrap.appendChild(h('div', { class: 'input-label', style: { marginTop: '0' } }, 'Sets'));
+    setsWrap.appendChild(h('input', { type: 'number', value: ex.sets, min: '1', max: '10',
+      onInput: e => { db.programme[key].exercices[idx].sets = parseInt(e.target.value) || ex.sets; }
+    }));
+    const repsWrap = h('div', { style: { flex: '1' } });
+    repsWrap.appendChild(h('div', { class: 'input-label', style: { marginTop: '0' } }, 'Reps'));
+    repsWrap.appendChild(h('input', { type: 'number', value: ex.reps || '', min: '1',
+      placeholder: '—',
+      onInput: e => { db.programme[key].exercices[idx].reps = parseInt(e.target.value) || null; }
+    }));
+    srRow.appendChild(setsWrap);
+    srRow.appendChild(repsWrap);
+    exWrap.appendChild(srRow);
+
+    content.appendChild(exWrap);
+  });
+
+  // Ajouter exercice
+  const addBtn = h('button', { class: 'btn btn-ghost', style: { marginBottom: '16px' },
+    onClick: () => {
+      db.programme[key].exercices.push({ name: 'Nouvel exercice', charge: 'Poids du corps', sets: 3, reps: 10, rir: 2, cue: '' });
+      saveDB(db);
+      closeModal();
+      editSeance(key);
+    }
+  }, '+ Ajouter exercice');
+  content.appendChild(addBtn);
+
+  const saveBtn = h('button', { class: 'btn btn-green',
+    onClick: () => { saveDB(db); closeModal(); renderScreen(); toast('✅ Programme sauvegardé'); }
+  }, '💾 Sauvegarder');
+  content.appendChild(saveBtn);
+
+  showModal(content);
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════
+
+function renderExport(screen) {
+  screen.appendChild(h('div', { class: 'page-title' }, 'Export & Synchro'));
+  screen.appendChild(h('div', { class: 'page-sub' }, 'Données et résumé Claude'));
+
+  // Stats
+  const statsCard = h('div', { class: 'card', style: { marginBottom: '20px' } });
+  const statsGrid = h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', textAlign: 'center' } });
+  [
+    { label: 'Séances', val: db.sessions.length, color: 'var(--orange)' },
+    { label: 'Logs réveil', val: db.recups.length, color: 'var(--purple)' },
+    { label: 'Runs', val: db.runs.length, color: 'var(--green)' },
+  ].forEach(({ label, val, color }) => {
+    const cell = h('div');
+    cell.appendChild(h('div', { style: { fontFamily: 'var(--font-mono)', fontSize: '24px', fontWeight: '600', color } }, String(val)));
+    cell.appendChild(h('div', { style: { fontSize: '10px', color: 'var(--text2)', marginTop: '2px' } }, label));
+    statsGrid.appendChild(cell);
+  });
+  statsCard.appendChild(statsGrid);
+  screen.appendChild(statsCard);
+
+  // Import JSON
+  screen.appendChild(h('div', { class: 'section-title' }, 'Import historique'));
+  const importInfo = h('div', { class: 'alert', style: { background: 'var(--primary-dim)', border: '1px solid rgba(79,158,248,0.3)', color: 'var(--primary)', marginBottom: '10px', fontSize: '11px' } },
+    '📥 Charge un fichier JSON exporté précédemment ou le fichier d\'historique fourni par Claude. Le programme actuel est conservé.'
+  );
+  screen.appendChild(importInfo);
+
+  const importInput = h('input', { type: 'file', accept: '.json', id: 'import-file', style: { display: 'none' } });
+  importInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!imported.sessions && !imported.recups && !imported.runs) {
+          toast('❌ Fichier invalide', 'var(--red)'); return;
+        }
+        const prog = db.programme; // keep current programme
+        if (imported.sessions) db.sessions = imported.sessions;
+        if (imported.recups) db.recups = imported.recups;
+        if (imported.runs) db.runs = imported.runs;
+        db.programme = prog;
+        saveDB(db);
+        renderScreen();
+        toast(`✅ ${(imported.sessions||[]).length} séances importées`);
+      } catch {
+        toast('❌ Erreur lecture JSON', 'var(--red)');
+      }
+    };
+    reader.readAsText(file);
+    importInput.value = '';
+  });
+  screen.appendChild(importInput);
+
+  const btnImport = h('button', { class: 'btn btn-primary', style: { marginBottom: '20px' },
+    onClick: () => importInput.click()
+  }, '📥 Importer historique (.json)');
+  screen.appendChild(btnImport);
+
+  // Export CSV Séances
+  screen.appendChild(h('div', { class: 'section-title' }, 'Export CSV'));
+
+  const btnCSV = h('button', { class: 'btn btn-primary', style: { marginBottom: '8px' },
+    onClick: () => exportCSV('sessions')
+  }, '📊 Exporter séances (.csv)');
+  screen.appendChild(btnCSV);
+
+  const btnCSVRecup = h('button', { class: 'btn btn-ghost', style: { marginBottom: '8px' },
+    onClick: () => exportCSV('recups')
+  }, '🌅 Exporter réveil / récup (.csv)');
+  screen.appendChild(btnCSVRecup);
+
+  const btnAll = h('button', { class: 'btn btn-ghost', style: { marginBottom: '20px' },
+    onClick: () => exportJSON()
+  }, '💾 Backup complet (.json)');
+  screen.appendChild(btnAll);
+
+  // Résumé Claude
+  screen.appendChild(h('div', { class: 'section-title' }, 'Résumé pour Claude'));
+
+  const lastN = Math.min(5, db.sessions.length);
+  const claudeResume = generateGlobalClaudeResume(lastN);
+
+  const pre = h('div', {
+    style: {
+      background: 'var(--card)', border: '1px solid var(--border)',
+      borderRadius: '12px', padding: '14px', marginBottom: '12px',
+      fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text2)',
+      lineHeight: '1.7', whiteSpace: 'pre-wrap', overflowX: 'auto',
+      maxHeight: '220px', overflowY: 'auto',
+    }
+  }, claudeResume);
+  screen.appendChild(pre);
+
+  const copyBtn = h('button', { class: 'btn btn-primary', style: { marginBottom: '8px' },
+    onClick: () => {
+      navigator.clipboard?.writeText(claudeResume).then(() => toast('✅ Copié — colle dans Claude'));
+    }
+  }, '📋 Copier résumé Claude (5 dernières)');
+  screen.appendChild(copyBtn);
+
+  // Reset
+  screen.appendChild(h('div', { class: 'sep' }));
+  const resetBtn = h('button', { class: 'btn btn-danger',
+    onClick: () => {
+      if (confirm('Supprimer TOUTES les données ? Cette action est irréversible.')) {
+        db = defaultDB();
+        saveDB(db);
+        renderScreen();
+        toast('🗑️ Données supprimées', 'var(--red)');
+      }
+    }
+  }, '🗑️ Réinitialiser toutes les données');
+  screen.appendChild(resetBtn);
+}
+
+function exportCSV(type) {
+  let csv = '';
+  if (type === 'sessions') {
+    csv = 'Date,Type,Durée(min),RPE,RIR,sRPE,Dos,Extrasystoles,Protocole,Notes\n';
+    const extraLabels = ['Aucune', 'À l\'effort', 'Au repos'];
+    db.sessions.forEach(s => {
+      csv += `${s.date},${s.type},${s.dureeMin || ''},${s.bilan?.rpe || ''},${s.bilan?.rir ?? ''},${s.sRPE || ''},${s.bilan?.dos ?? ''},${s.bilan?.extra != null ? extraLabels[s.bilan.extra] : ''},${s.protocole ? 'Oui' : 'Non'},"${s.bilan?.notes || ''}"\n`;
+    });
+  } else {
+    csv = 'Date,BB,RHR(bpm),Fatigue,Dos,Notes\n';
+    db.recups.forEach(r => {
+      csv += `${r.date},${r.bb ?? ''},${r.rhr || ''},${r.fatigue ?? ''},${r.dos ?? ''},"${r.notes || ''}"\n`;
+    });
+  }
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `trainapp_${type}_${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Export téléchargé');
+}
+
+function exportJSON() {
+  const json = JSON.stringify(db, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `trainapp_backup_${todayISO()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Backup exporté');
+}
+
+function generateGlobalClaudeResume(n) {
+  const sessions = db.sessions.slice(-n);
+  const lastRecup = db.recups[db.recups.length - 1];
+
+  let txt = `📊 RAPPORT ENTRAÎNEMENT — ${today()}\n`;
+  txt += `Dernières ${sessions.length} séances / ${db.sessions.length} total\n\n`;
+
+  if (lastRecup) {
+    txt += `🌅 DERNIÈRE RÉCUP (${lastRecup.displayDate})\n`;
+    txt += `BB: ${lastRecup.bb ?? '—'} | RHR: ${lastRecup.rhr ? lastRecup.rhr + ' bpm' : '—'} | Fatigue: ${lastRecup.fatigue ?? '—'}/10\n\n`;
+  }
+
+  txt += `📋 SÉANCES RÉCENTES:\n`;
+  sessions.reverse().forEach(s => {
+    txt += `\n• ${s.displayDate} — ${s.type} (${s.dureeMin}min)\n`;
+    txt += `  RPE: ${s.bilan?.rpe}/10 | RIR: ${s.bilan?.rir ?? '—'} | Dos: ${s.bilan?.dos ?? '—'}/10\n`;
+    const done = (s.exercices || []).filter(e => e.done);
+    if (done.length) {
+      txt += `  Exercices: ${done.map(e => `${e.name} @ ${e.charge}`).join(' · ')}\n`;
+    }
+    if (s.bilan?.notes) txt += `  Notes: ${s.bilan.notes}\n`;
+  });
+
+  txt += `\n---\nVigilances actives:\n`;
+  txt += `• Rowing: surveiller irradiation tibiale (L4)\n`;
+  txt += `• Cap RPE ≤7 (contexte cardiaque — Holter en attente)\n`;
+  txt += `• Fentes: cap 20kg genoux D+G\n`;
+
+  return txt;
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+
+function init() {
+  renderNav();
+  renderScreen();
+
+  // Keyboard safe area
+  window.addEventListener('resize', () => {
+    document.documentElement.style.setProperty('--keyboard-h', '0px');
+  });
+}
+
+init();
+</script>
+</body>
+</html>
